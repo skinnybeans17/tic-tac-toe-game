@@ -33,7 +33,7 @@ document.addEventListener('click', event => {
 
         if (!document.querySelectorAll('.grid-cell:not(.disabled)').length) {
             document.querySelector('.game-over').classList.add('visible')
-            document.querySelector('.game-over-text').textContent = 'It is a tie!'
+            document.querySelector('.game-over-text').textContent = 'Oh, a tie!'
         }
 
         game.winningOutcomes.forEach(winningOutcome => {
