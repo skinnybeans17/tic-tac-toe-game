@@ -91,7 +91,7 @@ h2{
 .game-over-text-draw {
     position: absolute;
     top: -200px;
-    font-size: 60px;
+    font-size: 48px;
     font-family: sans-serif;
     font-weight: bold;
     text-align: center;
