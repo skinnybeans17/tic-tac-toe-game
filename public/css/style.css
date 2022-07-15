@@ -1,0 +1,26 @@
+body {
+    text-align: center;
+   }
+   .board {
+    margin: auto;
+    width: 700px;
+   }
+   .board button {
+    height: 200px;
+    width: 200px;
+    margin: 0px;
+    padding: 0px;
+    float: left;
+    margin-right: 10px;
+    margin-bottom: 10px;
+    font-size: 100px;
+    color: yellow;
+    background-color: greenyellow;
+    border-color: orange;
+   }
+
+   #messages{
+       font-family: arial;
+       color: blue;
+       float: right;
+   }

@@ -1,23 +1,17 @@
 {
-  "name": "capstone-project",
+  "name": "multiplayertictactoe",
   "version": "1.0.0",
   "description": "",
-  "main": "app.js",
+  "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "nodemon server.js"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/skinnybeans17/tic-tac-toe-game.git"
-  },
+  "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/skinnybeans17/tic-tac-toe-game/issues"
-  },
-  "homepage": "https://github.com/skinnybeans17/tic-tac-toe-game#readme",
   "dependencies": {
-    "required": "^1.0.0",
-    "socket.io": "^4.5.1"
+    "express": "^4.17.1",
+    "nodemon": "^2.0.4",
+    "socket.io": "^2.5.0"
   }
 }
