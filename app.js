@@ -1,63 +1,85 @@
-const game = {
-    xTurn: true,
-    xState: [],
-    oState: [],
-    winningOutcomes: [
-        ['0', '1', '2'],
-        ['0', '3', '6'],
-        ['0', '4', '8'],
-        ['1', '4', '7'], 
-        ['2', '4', '6'],
-        ['2', '5', '8'],                
-        ['3', '4', '5'],
-        ['6', '7', '8']
-    ]
-}
+const http = require("http")
+const express = require("express");
+const app = express();
+const socketIo = require("socket.io");
+const fs = require("fs");
 
-document.addEventListener('click', event => {
-    const target = event.target
-    const isCell = target.classList.contains('grid-cell')
-    const isDisabled = target.classList.contains('disabled')
+const server = http.Server(app).listen(3000);
+const io = socketIo(server);
+const clients = {};
 
-    if (isCell && !isDisabled) {
-        const cellValue = target.dataset.value
+app.use(express.static(__dirname + "/client.js/"));
+app.use(express.static(__dirname + "/style.css/"));
+app.use(express.static(__dirname + "/../node_modules/"));
 
-        game.xTurn === true
-            ? game.xState.push(cellValue)
-            : game.oState.push(cellValue)
+app.get("/", (req, res) => {
+    var path = require('path');
+    res.sendFile(path.resolve('index.html'));
+});
 
-        target.classList.add('disabled')
-        target.classList.add(game.xTurn ? 'x' : 'o')
+var players = {};
+var unmatched;
 
-        game.xTurn = !game.xTurn
+io.on("connection", function(socket) {
+    let id = socket.id;
 
-        if (!document.querySelectorAll('.grid-cell:not(.disabled)').length) {
-            document.querySelector('.game-over').classList.add('visible')
-            document.querySelector('.game-over-text').textContent = 'Oh, a tie!'
+    console.log("New client connected. ID: ", socket.id);
+    clients[socket.id] = socket;
+
+    socket.on("disconnect", () => {
+        console.log("Client disconnected. ID: ", socket.id);
+        delete clients[socket.id];
+        socket.broadcast.emit("clientdisconnect", id);
+    });
+
+    join(socket);
+
+    if (opponentOf(socket)) {
+        socket.emit("game.begin", {
+            symbol: players[socket.id].symbol
+        });
+
+        opponentOf(socket).emit("game.begin", {
+            symbol: players[opponentOf(socket).id].symbol 
+        });
+    }
+
+    socket.on("make.move", function(data) {
+        if (!opponentOf(socket)) {
+            return;
         }
 
-        game.winningOutcomes.forEach(winningOutcome => {
-            const xWins = winningOutcome.every(state => game.xState.includes(state))
-            const oWins = winningOutcome.every(state => game.oState.includes(state))
+        socket.emit("move.made", data);
+        opponentOf(socket).emit("move.made", data);
+    });
 
-            if (xWins || oWins) {
-                document.querySelectorAll('.grid-cell').forEach(cell => cell.classList.add('disabled'))
-                document.querySelector('.game-over').classList.add('visible')
-                document.querySelector('.game-over-text').textContent = xWins
-                    ? 'X is the winner!'
-                    : 'O is the winner!'
-            }
-        })
+    socket.on("disconnect", function() {
+        if (opponentOf(socket)) {
+        opponentOf(socket).emit("opponent.left");
+        }
+    });
+});
+
+
+function join(socket) {
+    players[socket.id] = {
+        opponent: unmatched,
+        symbol: "X",
+        socket: socket
+    };
+
+    if (unmatched) { 
+        players[socket.id].symbol = "O";
+        players[unmatched].opponent = socket.id;
+        unmatched = null;
+    } else {
+        unmatched = socket.id;
     }
-})
+}
 
-document.querySelector('.restart').addEventListener('click', () => {
-    document.querySelector('.game-over').classList.remove('visible')
-    document.querySelectorAll('.grid-cell').forEach(cell => {
-        cell.classList.remove('disabled', 'x', 'o')
-    })
-
-    game.xTurn = true
-    game.xState = []
-    game.oState = []
-})
+function opponentOf(socket) {
+    if (!players[socket.id].opponent) {
+        return;
+    }
+    return players[players[socket.id].opponent].socket;
+}
