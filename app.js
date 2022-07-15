@@ -18,7 +18,7 @@ var players = {},
 
 io.sockets.on("connection", function (socket) {
     console.log("socket connected")
-  socket.emit('connect',{msg:"hello"})
+  socket.emit('connect',{msg:"Greetings"})
   joinGame(socket);
 
   if (getOpponent(socket)) {
